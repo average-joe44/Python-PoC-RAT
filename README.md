@@ -4,7 +4,7 @@ This is a python-based Remote Access Trojan(RAT)
 * With functions such as
   > Download/Upload file command
   > 
-  > Keylogging of course
+  > Keylogging
   >
   > screen share/shot
   >
@@ -60,3 +60,6 @@ Target machine
 ```
 python target.py
 ```
+
+## WARNING ⚠
+I do not take any responsibility if someone has installed this Trojan on another person computer, if there's any person who got their data stolen. Not my fault, not my responsibility to apologize.
