@@ -88,4 +88,5 @@ I do not take any responsibility if someone has installed this Trojan on another
 > 
 > etc.
 >
-So the point is there's many ways to detect it, easy asf, but if just the RAT got it hex edited or added a trusted process icon and got put in the trusted folder, it still hard to detect. So don't ever install this on someone computer unless its a test and the owner knows it, that'll be fine. 
+
+I don't take any responsibility if anyone has this installed on someone computer.
