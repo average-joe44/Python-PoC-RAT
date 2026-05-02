@@ -268,43 +268,43 @@ def shellc():
                    
                       basic command:
                    ================================
-                   -exit/quit >> keluar
+                   -exit/quit >> exit program
                    
-                   -clear     >> bersihkan terminal
+                   -clear     >> clear terminal
 
-                   -banner    >> baner
+                   -banner    >> banner
                    ================================
 
                       file transfer command:
                    ================================
-                   -download  >> mendownload file
+                   -download  >> download file
 
-                   -upload    >> mengupload file
+                   -upload    >> upload file
                    ================================
 
                       keylogging:
                    ================================
-                   -start_log >> memulai keylogger
+                   -start_log >> start keylogger
 
-                   -baca_log  >> membaca hasil keylogger
+                   -baca_log  >> read result from keylogger
 
-                   -clear_log >> menghapus hasil keylogger
+                   -clear_log >> delete log from keylogger
 
-                   -stop_log  >> menghentikan keylogger
+                   -stop_log  >> stop keylogger
                    ================================
 
                      camera command:
                    ================================                   
-                   -start_cam >> mengakses kamera
+                   -start_cam >> access camera
 
-                   -snap_cam  >> memotret kamera
+                   -snap_cam  >> snap camera
                    ================================
 
                      screen command:
                    ================================
-                   -screen_shot >> screenshot layar
+                   -screen_shot >> snap screen
 
-                   -screen_share >> berbagi layar
+                   -screen_share >> screen sharing
                    ================================
 
                      maintain access:
@@ -315,10 +315,15 @@ def shellc():
 
                      mic, keys command:
                    ================================
-                   -rec_audio >> merekam audio
+                   -rec_audio >> record audio for 20 sec
                    
-                   -send_key  >> mengetikan keyboard
+                   -send_key  >> type keyboard
                    ================================ 
+
+                     execution
+                   ================================
+                   -execute     >> execute program
+                   =================================
                    
                    """)
           elif perintah == 'rec_audio':
