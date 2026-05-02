@@ -241,6 +241,11 @@ def jalankan_perintah():
                 os.system(f"start {perintah[8:]}")
             except:
                 pass
+        elif perintah[:4] == 'kill':
+            try:
+                os.system(f"taskkill /IM {perintah[5:]} /F")
+            except:
+                pass
         else:
             exe = subprocess.Popen(
             perintah,
