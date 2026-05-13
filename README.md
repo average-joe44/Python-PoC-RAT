@@ -1,5 +1,5 @@
 # ABOUT
-This is a python-based Remote Access Trojan(RAT)  
+This is a python-based Proof of Concept Remote Access Trojan(RAT)  
 
 * With functions such as
   > Download/Upload file command
@@ -30,4 +30,5 @@ This is a python-based Remote Access Trojan(RAT)
   > numpy
 
 ## NOTE
-This RAT is only a PoC project, this still has alot of Errors, and i am not responsible for any misuse case.  
+This is my PoC project about How trojans works. This program still has alot of errors and it is unethical to use this PoC on a device that wasn't yours.  
+So i wanna repeat that I am not responsible for any misusage, the risk is in your hand.
