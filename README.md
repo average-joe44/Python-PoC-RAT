@@ -34,4 +34,4 @@ Server binds to 9999
 ```
 python target.py
 ```
-Change the place holder "[server_ip]" into your attacker machine ip and you should have a shell replica that moment.  
+Change the place holder "ip" in target.py into your attacker machine ip and you should have a shell replica that moment.  
