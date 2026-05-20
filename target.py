@@ -180,7 +180,7 @@ def upload_file(namafile):
         sok.sendall(struct.pack("Q", 0))
         return
     if os.path.isdir(namafile):
-        sok.sendall(struct.pack("Q", 0))
+        sok.sendall(struct.pack("Q", 1))
         return
     filesize = os.path.getsize(namafile)
     sok.sendall(struct.pack("Q", filesize))
